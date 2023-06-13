@@ -1,0 +1,36 @@
+package com.jwt.example.Config;
+
+import com.jwt.example.Security.JWTAuthenticationEntryPoint;
+import com.jwt.example.Security.JWTAuthenticationFilter;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.web.SecurityFilterChain;
+
+@Configuration
+public class SecurityConfig {
+
+    @Autowired
+    private JWTAuthenticationEntryPoint entryPoint;
+
+    @Autowired
+    private JWTAuthenticationFilter jwtAuthenticationFilter;
+
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception{
+
+        //configuration.
+        http.csrf(csrf -> csrf.disable())
+                .cors(cors -> cors.disable())
+                .authorizeHttpRequests(authReq ->
+                        authReq.requestMatchers("/home/**").authenticated().requestMatchers("/auth/login")
+                                .permitAll().anyRequest().authenticated())
+                .exceptionHandling(ex -> ex.authenticationEntryPoint(entryPoint))
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));  //currently not storing anything ons ever
+
+
+        return http.build();
+    }
+}
